@@ -1,10 +1,10 @@
-import Redis from "ioredis-mock";
 import {
     Injectable,
     NestInterceptor,
     ExecutionContext,
     CallHandler,
-    BadRequestException,
+    HttpException,
+    HttpStatus,
   } from '@nestjs/common';
 import { Observable,from ,throwError ,scheduled,asyncScheduler} from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
@@ -17,8 +17,10 @@ export class RateLimitInterceptor implements NestInterceptor {
     async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> { 
         const request = context.switchToHttp().getRequest();
         const response = context.switchToHttp().getResponse();
-        const userId = request.user.id;
-    
+        const userId = request.user?.id;
+        if (!userId) {
+            return throwError(() => new HttpException('User ID is required to complete request', HttpStatus.BAD_REQUEST));
+          }
         const currentHour = new Date().getHours();
         const key = `rate-limit:${userId}:${currentHour}`;
         const maxRequests = 100;
