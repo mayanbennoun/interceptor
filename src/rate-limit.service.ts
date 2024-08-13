@@ -1,12 +1,12 @@
-import { Injectable } from '@nestjs/common';
-import { Redis } from 'ioredis';
+import { Injectable,Inject  } from '@nestjs/common';
+import Redis from 'ioredis-mock';
 
 @Injectable()
 export class RateLimitService {
   private readonly WINDOW_SIZE_IN_HOURS = 1;
   private readonly MAX_WINDOW_REQUEST_COUNT = 100;
 
-  constructor(private readonly redisClient: Redis) {}
+  constructor(@Inject('RedisClient') private readonly redisClient) {}
 
   async isRateLimited(userId: string): Promise<{ isLimited: boolean; remainingRequests: number; retryAfter?: number }> {
     const key = this.getRateLimitKey(userId);
