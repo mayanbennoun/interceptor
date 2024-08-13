@@ -6,12 +6,12 @@ export class RateLimitController {
   constructor(private readonly rateLimitService: RateLimitService) {}
 
   @Get('check')
-  async checkRateLimit(@Headers('x-client-id') clientId: string) {
-    if (!clientId) {
-      throw new HttpException('Client ID is required', HttpStatus.BAD_REQUEST);
+  async checkRateLimit(@Headers('userId') userId: string) {
+    if (!userId) {
+      throw new HttpException('User ID is required', HttpStatus.BAD_REQUEST);
     }
 
-    const result = await this.rateLimitService.isRateLimited(clientId);
+    const result = await this.rateLimitService.isRateLimited(userId);
     return {
       isLimited: result.isLimited,
       remainingRequests: result.remainingRequests,

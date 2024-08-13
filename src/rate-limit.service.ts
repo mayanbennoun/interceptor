@@ -8,8 +8,8 @@ export class RateLimitService {
 
   constructor(private readonly redisClient: Redis) {}
 
-  async isRateLimited(clientId: string): Promise<{ isLimited: boolean; remainingRequests: number; retryAfter?: number }> {
-    const record = await this.getRateLimitRecord(clientId);
+  async isRateLimited(userId: string): Promise<{ isLimited: boolean; remainingRequests: number; retryAfter?: number }> {
+    const record = await this.getRateLimitRecord(userId);
     const currentRequestTime = Date.now();
     const windowStartTimestamp = currentRequestTime - this.WINDOW_SIZE_IN_HOURS * 60 * 60 * 1000;
 
@@ -22,7 +22,7 @@ export class RateLimitService {
       return { isLimited: true, remainingRequests: 0, retryAfter };
     } else {
       record.push(currentRequestTime);
-      await this.saveRateLimitRecord(clientId, record);
+      await this.saveRateLimitRecord(userId, record);
       const remainingRequests = this.MAX_WINDOW_REQUEST_COUNT - (totalWindowRequestsCount + 1);
       return { isLimited: false, remainingRequests };
     }
