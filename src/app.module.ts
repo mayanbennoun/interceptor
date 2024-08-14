@@ -9,11 +9,18 @@ import Redis from 'ioredis';
 @Module({
   imports: [],
   controllers: [AppController],
-  providers: [AppService, RateLimitService, 
+  providers: [
+    AppService,
     RateLimitInterceptor,
     {
       provide: 'RedisClient',
       useFactory: () => new Redis(), // Default Redis client
+    },
+    {
+      // You can configure TTL and allowed request count here
+      provide: RateLimitService,
+      useFactory: (redisClient) => new RateLimitService(redisClient),
+      inject: ['RedisClient'],
     },
   ],
 })
