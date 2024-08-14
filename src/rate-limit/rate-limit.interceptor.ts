@@ -23,12 +23,12 @@ export class RateLimitInterceptor implements NestInterceptor {
             return throwError(() => new HttpException('User ID is required to complete request', HttpStatus.BAD_REQUEST));
           }
 
-        const rateLimitResult = await this.rateLimitService.isRateLimited(userId);
-         if (rateLimitResult.isLimited) {
-          response.setHeader('Retry-After', rateLimitResult.retryAfter);
-          throw new HttpException('Too many requests, please try again later. ', HttpStatus.TOO_MANY_REQUESTS);
+        const limitStatus = await this.rateLimitService.isRateLimited(userId);
+         if (limitStatus.isLimited) {
+          response.setHeader('Retry-Time', limitStatus.retryTime);
+          throw new HttpException(`Too many requests. Please ${limitStatus.retryTime}.`, HttpStatus.TOO_MANY_REQUESTS);
         }
-        response.setHeader('X-Count', rateLimitResult.remainingRequests);
+        response.setHeader('X-Count', limitStatus.remainingRequests);
 
         return next.handle().pipe(
           catchError((err) => throwError(() => err)),
