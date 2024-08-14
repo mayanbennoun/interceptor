@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { RateLimitInterceptor } from './rate-limit/rate-limit.interceptor';
-import { RateLimitService } from './rate-limit/rate-limit.service';
+import { RateLimitInterceptor } from './Interceptors/rate-limit/rate-limit.interceptor';
+import { RateLimitService } from './Interceptors/rate-limit/rate-limit.service';
 import createMockRedis from 'ioredis-mock';
 
 

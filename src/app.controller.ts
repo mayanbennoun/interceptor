@@ -1,6 +1,6 @@
 import { Controller, Get, BadRequestException, UseInterceptors,Query } from '@nestjs/common';
 import { AppService } from './app.service';
-import { RateLimitInterceptor } from './rate-limit/rate-limit.interceptor';
+import { RateLimitInterceptor } from './Interceptors/rate-limit/rate-limit.interceptor';
 
 @UseInterceptors(RateLimitInterceptor)
 @Controller()
