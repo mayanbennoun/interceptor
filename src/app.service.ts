@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class AppService {
-  getHello(): string {
-    return 'Hello World!';
+  getMessage(): string {
+    return 'This is rate-limit inerceptor, Every User is limited in the amount of requests per hour';
   }
 }
