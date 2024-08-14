@@ -3,7 +3,7 @@ import { Utils } from './utils';
 @Injectable()
 export class RateLimitService {
   private readonly HOURS = 1;
-  private readonly Allowed_REQUEST_COUNT = 3;
+  private readonly ALLOWED_REQUEST_COUNT = 3;
 
   constructor(@Inject('RedisClient') private readonly redisClient) {}
 
@@ -28,7 +28,7 @@ export class RateLimitService {
       await this.redisClient.expire(key, this.HOURS * 3600);
     }
 
-    const remainingRequests = this.Allowed_REQUEST_COUNT - currentCount;
+    const remainingRequests = this.ALLOWED_REQUEST_COUNT - currentCount;
     
     if (remainingRequests < 0) {
       const ttl = await this.redisClient.ttl(key);
