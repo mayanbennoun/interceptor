@@ -1,6 +1,4 @@
 import { Injectable,Inject  } from '@nestjs/common';
-import Redis from 'ioredis-mock';
-
 @Injectable()
 export class RateLimitService {
   private readonly WINDOW_SIZE_IN_HOURS = 1;
