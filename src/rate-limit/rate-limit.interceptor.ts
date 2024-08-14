@@ -18,7 +18,7 @@ export class RateLimitInterceptor implements NestInterceptor {
     async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> { 
         const request = context.switchToHttp().getRequest();
         const response = context.switchToHttp().getResponse();
-        const userId = request.user?.id;
+        const userId = request.query.userId;
         if (!userId) {
             return throwError(() => new HttpException('User ID is required to complete request', HttpStatus.BAD_REQUEST));
           }
@@ -26,7 +26,7 @@ export class RateLimitInterceptor implements NestInterceptor {
         const rateLimitResult = await this.rateLimitService.isRateLimited(userId);
          if (rateLimitResult.isLimited) {
           response.setHeader('Retry-After', rateLimitResult.retryAfter);
-          throw new HttpException('Too many requests, please try again later.', HttpStatus.TOO_MANY_REQUESTS);
+          throw new HttpException('Too many requests, please try again later. ', HttpStatus.TOO_MANY_REQUESTS);
         }
         response.setHeader('X-Count', rateLimitResult.remainingRequests);
 

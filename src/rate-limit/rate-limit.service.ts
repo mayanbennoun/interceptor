@@ -4,7 +4,7 @@ import Redis from 'ioredis-mock';
 @Injectable()
 export class RateLimitService {
   private readonly WINDOW_SIZE_IN_HOURS = 1;
-  private readonly MAX_WINDOW_REQUEST_COUNT = 100;
+  private readonly MAX_WINDOW_REQUEST_COUNT = 5;
 
   constructor(@Inject('RedisClient') private readonly redisClient) {}
 
