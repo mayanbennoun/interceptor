@@ -5,6 +5,7 @@ import { RateLimitInterceptor } from './Interceptors/rate-limit/rate-limit.inter
 import { RateLimitService } from './Interceptors/rate-limit/rate-limit.service';
 import Redis from 'ioredis';
 
+
 @Module({
   imports: [],
   controllers: [AppController],
@@ -12,7 +13,7 @@ import Redis from 'ioredis';
     RateLimitInterceptor,
     {
       provide: 'RedisClient',
-      useFactory: () => new Redis(),
+      useFactory: () => new Redis(), // Default Redis client
     },
   ],
 })

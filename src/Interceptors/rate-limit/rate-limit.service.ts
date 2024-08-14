@@ -2,40 +2,35 @@ import { Injectable,Inject  } from '@nestjs/common';
 import { Utils } from './utils';
 @Injectable()
 export class RateLimitService {
-  private readonly HOURS = 1;
+  private readonly TTL = 60 * 60; // 1 hour
   private readonly ALLOWED_REQUEST_COUNT = 3;
 
   constructor(@Inject('RedisClient') private readonly redisClient) {}
 
   async isExceededRequestsLimit(userId: string): Promise<{ isLimited: boolean; remainingRequests: number; retryTime?: string }> {
     const key = `rate-limit:${userId}`;
-    //const currentCount = await this.redisClient.incr(key);
-    const currentCount = await this.redisClient.eval(
-      `
-      local currentCount = redis.call("INCR", KEYS[1])
-      if currentCount == 1 then
-        redis.call("EXPIRE", KEYS[1], ARGV[1])
-      end
-      return currentCount
-      `,
-      1,
-      key,
-      this.HOURS * 3600
-    );
-    console.log( `count ${currentCount}, userid ${userId} `)
-    if (currentCount === 1) {
-      // Set expiration for the key when the first request is made
-      await this.redisClient.expire(key, this.HOURS * 3600);
+    const exists = await this.redisClient.exists(key);
+
+    let currentValue = this.ALLOWED_REQUEST_COUNT;
+    let ttl = this.TTL;
+
+    if (exists) {
+        currentValue = await this.redisClient.get(key);
+        ttl = await this.redisClient.ttl(key);
+
+        if (currentValue > 0) {
+            await this.redisClient.decr(key);
+        }
+    } else {
+        await this.redisClient.set(key, this.ALLOWED_REQUEST_COUNT - 1, 'EX', this.TTL);
     }
 
-    const remainingRequests = this.ALLOWED_REQUEST_COUNT - currentCount;
+    let retryTime = Utils.formatTimestampWithTTL(ttl);
+    const isLimited = currentValue <= 0;
     
-    if (remainingRequests < 0) {
-      const ttl = await this.redisClient.ttl(key);
-      const retryTime = ttl > 0 ? Utils.formatRetryTime(ttl) : null; // Format retry time or set to null
-      return { isLimited: true, remainingRequests: 0, retryTime: retryTime };
-    }
+    // calculate remaining requests based on the current value, as it's already decremented.
+    const remainingRequests = currentValue > 0 ? currentValue - 1 : 0;
 
-    return { isLimited: false, remainingRequests };
+    return { isLimited, remainingRequests, retryTime };
   }
 }

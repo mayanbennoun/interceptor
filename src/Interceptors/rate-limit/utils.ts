@@ -1,11 +1,9 @@
 import { Injectable  } from '@nestjs/common';
 @Injectable()
 export class Utils {
-    static formatRetryTime(ttl: number): string {
-        const now = new Date();
-        const retryTime = new Date(now.getTime() + ttl * 1000); // Convert seconds to milliseconds
-        const hours = retryTime.getHours().toString().padStart(2, '0');
-        const minutes = retryTime.getMinutes().toString().padStart(2, '0');
-        return `${hours}:${minutes}`;
-      }
+    static formatTimestampWithTTL(ttl: number, currentTime: number = Date.now()): string {
+      // Return the timestamp when the key will expire
+      const date = new Date(currentTime + (ttl * 1000));
+      return date.toISOString().split('.')[0];
+    }
 }
