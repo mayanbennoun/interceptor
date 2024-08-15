@@ -16,7 +16,7 @@ describe('AppController', () => {
         RateLimitInterceptor,
         {
           provide: 'RedisClient',
-          useFactory: () => new Redis(),
+          useFactory: () => new Redis(), // Mock Redis Client
         },
         {
           provide: RateLimitService,

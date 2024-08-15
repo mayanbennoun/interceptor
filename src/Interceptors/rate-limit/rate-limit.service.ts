@@ -5,6 +5,13 @@ export class RateLimitService {
   private readonly ttl: number;
   private readonly allowedRequestCount: number;
 
+  /**
+   * Constructs the RateLimitService with a Redis client, TTL, and allowed request count.
+   * 
+   * @param redisClient The Redis client used for storing and retrieving rate limit data.
+   * @param ttl The time-to-live (TTL) for the rate limit key in Redis (default: 1 hour).
+   * @param allowedRequestCount The number of requests allowed within the TTL period (default: 100).
+   */
   constructor(
     @Inject('RedisClient') private readonly redisClient,
     ttl: number = 60 * 60, // Default TTL is 1 hour
@@ -14,6 +21,15 @@ export class RateLimitService {
     this.allowedRequestCount = allowedRequestCount;
   }
 
+  /**
+   * Enforces the rate limit for a given user ID.
+   * 
+   * This method checks whether the user has exceeded their allowed request limit within the TTL period.
+   * It uses Redis to track the number of requests and sets an expiration time for the rate limit key.
+   * 
+   * @param userId The ID of the user making the request.
+   * @returns A promise that resolves to an object containing the rate limit status, remaining requests, and retry time.
+   */
   async enforceRequestLimit(
     userId: string,
   ): Promise<{
@@ -26,7 +42,11 @@ export class RateLimitService {
 
     let currentValue = this.allowedRequestCount;
     let ttl = this.ttl;
-
+    /**
+    * Enforces the rate limit for a given user ID.
+    * checks if a rate limit key exists in Redis. If it does, it decrements the request count and updates the TTL; 
+    * if not, it creates the key with an initial request count and sets the TTL.
+    */
     if (exists) {
       currentValue = await this.redisClient.get(key);
       ttl = await this.redisClient.ttl(key);
