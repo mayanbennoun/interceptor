@@ -8,7 +8,6 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { of } from 'rxjs';
-import Redis from 'ioredis-mock';
 import {
   rateLimitServiceProvider,
   redisMockProvider,
@@ -31,6 +30,7 @@ describe('RateLimitInterceptor', () => {
     interceptor = module.get(RateLimitInterceptor);
   });
 
+  // Test case to ensure that the interceptor throws an error when the user ID is not provided in the request.
   it('should throw error when userId is not provided', async () => {
     const context = createMockExecutionContext({});
     const next: CallHandler = { handle: () => of(true) };
@@ -43,6 +43,7 @@ describe('RateLimitInterceptor', () => {
     );
   });
 
+  // Test case for allowing request process when not limited
   it('should allow request when limit is not exceeded', async () => {
     jest
       .spyOn(rateLimitService, 'enforceRequestLimit')
@@ -54,6 +55,7 @@ describe('RateLimitInterceptor', () => {
     await expect(interceptor.intercept(context, next)).resolves.toBeDefined();
   });
 
+  // Test case to ensure the limit is enforced
   it('should deny request when limit is exceeded', async () => {
     jest.spyOn(rateLimitService, 'enforceRequestLimit').mockResolvedValue({
       isLimited: true,
@@ -72,6 +74,11 @@ describe('RateLimitInterceptor', () => {
     );
   });
 
+  /**
+   * Helper function to create a mock ExecutionContext for testing.
+   * @param query The query parameters to simulate in the request.
+   * @returns A mock ExecutionContext with the specified query parameters.
+   */
   function createMockExecutionContext(query: any): ExecutionContext {
     return {
       switchToHttp: () => ({

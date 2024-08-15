@@ -15,6 +15,18 @@ import { Request, Response } from 'express';
 export class RateLimitInterceptor implements NestInterceptor {
   constructor(private readonly rateLimitService: RateLimitService) {}
 
+  /**
+   * Intercepts incoming HTTP requests to enforce rate limiting.
+   * 
+   * This method checks whether the request exceeds the rate limit based on the user ID provided .
+   * If the user has exceeded their rate limit, it throws an HttpException with a TOO_MANY_REQUESTS status and includes
+   * a 'Retry-Time' header in the response indicating when the user can make another request. If the limit is not exceeded,
+   * it sets an 'X-Count' header in the response showing the remaining number of requests available.
+   * 
+   * @param context The execution context that contains details about the current request.
+   * @param next The next handler in the request processing pipeline.
+   * @returns An Observable that handles the request processing, or throws an error if the rate limit is exceeded.
+   */
   async intercept(
     context: ExecutionContext,
     next: CallHandler,
